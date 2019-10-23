@@ -44,6 +44,9 @@ pub struct Connection {
 
     // Indicate whether this connection is shutting down.
     shutting_down: bool,
+
+    // TODO: this is just a test - remove
+    pub skip_prepare: bool,
 }
 
 impl Connection {
@@ -61,6 +64,7 @@ impl Connection {
             requests_rx,
             shutting_down: false,
             incoming_messages_tx,
+            skip_prepare: false, // TODO: remove this param
         })
     }
 
@@ -69,7 +73,11 @@ impl Connection {
     }
 
     fn prepare_message(&mut self, message: &mut NetlinkMessage) {
-        self.sequence_id += 1;
+        // TODO: Remove if
+        if !self.skip_prepare {
+            self.sequence_id += 1;
+        }
+
         message.header.sequence_number = self.sequence_id;
         message.finalize();
     }

@@ -24,10 +24,12 @@ netlink-sys = { path = "../netlink-sys", version = "0.1" }
 # By default this crate does not does anything useful. You should enable a
 # netlink protocol (either rtnetlink or audit), and optionally, tokio support.
 default = []
-# Adds support rtnetlink messages
+# Adds support for rtnetlink messages
 rtnetlink = []
-# Adds support audit messages
+# Adds support for audit messages
 audit = []
+# Adds support for kernel connector messagesw
+connector = []
 
 [[example]]
 name = "dump_links"

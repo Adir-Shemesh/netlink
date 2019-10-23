@@ -12,6 +12,9 @@ use crate::{RtnlBuffer, RtnlMessage};
 #[cfg(feature = "audit")]
 use crate::{AuditBuffer, AuditMessage};
 
+#[cfg(feature = "connector")]
+use crate::{ConnectorBuffer, ConnectorMessage};
+
 /// Represent a netlink message.
 ///
 /// A netlink message is made of a header (represented by
@@ -52,7 +55,9 @@ pub enum NetlinkPayload {
     Rtnl(RtnlMessage),
     #[cfg(feature = "audit")]
     Audit(AuditMessage),
-    #[cfg(not(any(feature = "rtnetlink", feature = "audit")))]
+    #[cfg(feature = "connector")]
+    Connector(ConnectorMessage),
+    #[cfg(not(any(feature = "rtnetlink", feature = "audit", feature = "connector")))]
     #[doc(hidden)]
     __Default,
 }
@@ -70,7 +75,9 @@ impl NetlinkPayload {
             Rtnl(ref msg) => msg.message_type(),
             #[cfg(feature = "audit")]
             Audit(ref msg) => msg.message_type(),
-            #[cfg(not(any(feature = "rtnetlink", feature = "audit")))]
+            #[cfg(feature = "connector")]
+            Connector(ref msg) => NLMSG_DONE, // msg.message_type(), // TODO: What the fuck?
+            #[cfg(not(any(feature = "rtnetlink", feature = "audit", feature = "connector")))]
             _ => 0,
         }
     }
@@ -87,6 +94,15 @@ impl NetlinkPayload {
     #[cfg(feature = "audit")]
     pub fn is_audit(&self) -> bool {
         if let NetlinkPayload::Audit(_) = *self {
+            true
+        } else {
+            false
+        }
+    }
+
+    #[cfg(feature = "connector")]
+    pub fn is_connector(&self) -> bool {
+        if let NetlinkPayload::Connector(_) = *self {
             true
         } else {
             false
@@ -149,6 +165,13 @@ impl From<AuditMessage> for NetlinkMessage {
     }
 }
 
+#[cfg(feature = "connector")]
+impl From<ConnectorMessage> for NetlinkMessage {
+    fn from(msg: ConnectorMessage) -> Self {
+        NetlinkMessage::from(NetlinkPayload::Connector(msg))
+    }
+}
+
 impl NetlinkMessage {
     pub fn new(header: NetlinkHeader, payload: NetlinkPayload) -> Self {
         NetlinkMessage { header, payload }
@@ -198,6 +221,11 @@ impl NetlinkMessage {
         self.payload.is_audit()
     }
 
+    #[cfg(feature = "connector")]
+    pub fn is_connector(&self) -> bool {
+        self.payload.is_connector()
+    }
+
     /// Ensure the header (`NetlinkHeader`) is consistent with the payload (`NetlinkPayload`):
     ///
     /// - compute the payload length and set the header's length field
@@ -231,6 +259,9 @@ impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<NetlinkMessage> for NetlinkBuf
                 }
             }
             NLMSG_NOOP => Noop,
+
+            // TODO: comment - seems like when a connector packet is received, we get a Done message?
+            #[cfg(not(feature = "connector"))]
             NLMSG_DONE => Done,
 
             #[cfg(feature = "rtnetlink")]
@@ -243,7 +274,12 @@ impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<NetlinkMessage> for NetlinkBuf
                 AuditBuffer::new_checked(self.payload())?.parse_with_param(message_type)?,
             ),
 
-            #[cfg(not(any(feature = "rtnetlink", feature = "audit")))]
+            #[cfg(feature = "connector")]
+            message_type => NetlinkPayload::Connector(
+                ConnectorBuffer::new_checked(self.payload())?.parse_with_param(message_type)?,
+            ),
+
+            #[cfg(not(any(feature = "rtnetlink", feature = "audit", feature = "connector")))]
             _ => __Default,
         };
         Ok(NetlinkMessage { header, payload })
@@ -265,7 +301,10 @@ impl Emitable for NetlinkMessage {
             #[cfg(feature = "audit")]
             Audit(ref msg) => msg.buffer_len(),
 
-            #[cfg(not(any(feature = "rtnetlink", feature = "audit")))]
+            #[cfg(feature = "connector")]
+            Connector(ref msg) => msg.buffer_len(),
+
+            #[cfg(not(any(feature = "rtnetlink", feature = "audit", feature = "connector")))]
             __Default => 0,
         };
 
@@ -290,7 +329,10 @@ impl Emitable for NetlinkMessage {
             #[cfg(feature = "audit")]
             Audit(ref msg) => msg.emit(buffer),
 
-            #[cfg(not(any(feature = "rtnetlink", feature = "audit")))]
+            #[cfg(feature = "connector")]
+            Connector(ref msg) => msg.emit(buffer),
+
+            #[cfg(not(any(feature = "rtnetlink", feature = "audit", feature = "connector")))]
             __Default => {}
         }
     }

@@ -1056,6 +1056,53 @@ pub const AUDIT_NLGRP_NONE: u32 = 0;
 /// Multicast group to listen for audit events
 pub const AUDIT_NLGRP_READLOG: u32 = 1;
 
+/// Process Events connector unique ids -- used for message routing
+pub const CN_IDX_PROC: u32 = 0x1;
+pub const CN_VAL_PROC: u32 = 0x1;
+pub const CN_IDX_CIFS: u32 = 0x2;
+pub const CN_VAL_CIFS: u32 = 0x1;
+/// w1 communication
+pub const CN_W1_IDX: u32 = 0x3;
+pub const CN_W1_VAL: u32 = 0x1;
+pub const CN_IDX_V86D: u32 = 0x4;
+pub const CN_VAL_V86D_UVESAFB: u32 = 0x1;
+/// BlackBoard, from the TSP GPL sampling framework
+pub const CN_IDX_BB: u32 = 0x5;
+pub const CN_DST_IDX: u32 = 0x6;
+pub const CN_DST_VAL: u32 = 0x1;
+///Device Mapper
+pub const CN_IDX_DM: u32 = 0x7;
+pub const CN_VAL_DM_USERSPACE_LOG: u32 = 0x1;
+pub const CN_IDX_DRBD: u32 = 0x8;
+pub const CN_VAL_DRBD: u32 = 0x1;
+/// HyperV KVP
+pub const CN_KVP_IDX: u32 = 0x9;
+/// queries from the kernel
+pub const CN_KVP_VAL: u32 = 0x1;
+/// HyperV VSS
+pub const CN_VSS_IDX: u32 = 0xA;
+pub const CN_VSS_VAL: u32 = 0x1;
+
+/// Userspace sends this enum to register with the kernel that
+/// it is listening for events on the connector.
+pub const PROC_CN_MCAST_LISTEN: u32 = 1;
+pub const PROC_CN_MCAST_IGNORE: u32 = 2;
+
+/// Proc connector event types
+pub const PROC_EVENT_NONE: u32 = 0x0000_0000;
+pub const PROC_EVENT_FORK: u32 = 0x0000_0001;
+pub const PROC_EVENT_EXEC: u32 = 0x0000_0002;
+pub const PROC_EVENT_UID: u32 = 0x0000_0004;
+pub const PROC_EVENT_GID: u32 = 0x0000_0040;
+pub const PROC_EVENT_SID: u32 = 0x0000_0080;
+pub const PROC_EVENT_PTRACE: u32 = 0x0000_0100;
+pub const PROC_EVENT_COMM: u32 = 0x0000_0200;
+// "next" should be 0x00000400
+// "last" is the last process event: exit,
+// while "next to last" is coredumping event
+pub const PROC_EVENT_COREDUMP: u32 = 0x4000_0000;
+pub const PROC_EVENT_EXIT: u32 = 0x8000_0000;
+
 pub const NLMSGERR_ATTR_UNUSED: int = 0;
 pub const NLMSGERR_ATTR_MSG: int = 1;
 pub const NLMSGERR_ATTR_OFFS: int = 2;

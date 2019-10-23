@@ -259,6 +259,19 @@ impl Socket {
         let buf_len = buf.len() as libc::size_t;
 
         let res = unsafe { libc::sendto(self.0, buf_ptr, buf_len, flags, addr_ptr, addr_len) };
+
+        // TODO: remove this
+        // let res = unsafe {
+        //     libc::sendto(
+        //         self.0,
+        //         buf_ptr,
+        //         buf_len,
+        //         flags,
+        //         libc::PT_NULL as *const libc::sockaddr,
+        //         0,
+        //     )
+        // };
+
         if res < 0 {
             return Err(Error::last_os_error());
         }
@@ -344,7 +357,7 @@ impl Socket {
     /// `NETLINK_LISTEN_ALL_NSID` (since Linux 4.2). When set, this socket will receive netlink
     /// notifications from  all  network  namespaces that have an nsid assigned into the network
     /// namespace where the socket has been opened. The nsid is sent to user space via an ancillary
-    /// data.                                    
+    /// data.
     pub fn set_listen_all_namespaces(&mut self, value: bool) -> Result<()> {
         let value: libc::c_int = if value { 1 } else { 0 };
         setsockopt(
@@ -379,7 +392,7 @@ impl Socket {
 /// Wrapper around `getsockopt`:
 ///
 /// ```no_rust
-/// int getsockopt(int socket, int level, int option_name, void *restrict option_value, socklen_t *restrict option_len);      
+/// int getsockopt(int socket, int level, int option_name, void *restrict option_value, socklen_t *restrict option_len);
 /// ```
 fn getsockopt<T: Copy>(fd: RawFd, level: libc::c_int, option: libc::c_int) -> Result<T> {
     unsafe {

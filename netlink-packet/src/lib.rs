@@ -142,6 +142,11 @@ mod audit;
 #[cfg(feature = "audit")]
 pub use self::audit::*;
 
+#[cfg(feature = "connector")]
+mod connector;
+#[cfg(feature = "connector")]
+pub use self::connector::*;
+
 mod netlink;
 pub use self::netlink::*;
 
