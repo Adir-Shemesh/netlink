@@ -76,7 +76,6 @@ impl<'buffer, T: AsRef<[u8]> + ?Sized> ParseableParametrized<ConnectorMessage, u
         let data = self.buffer.as_ref()[DATA].to_vec().clone();
 
         let proc_event_type = NativeEndian::read_u32(&data[ProcConnectorMessage::WHAT]);
-        info!("Got proc connector event: {:x}", proc_event_type);
         let cpu = NativeEndian::read_u32(&data[ProcConnectorMessage::CPU]);
         let timestamp = NativeEndian::read_u64(&data[ProcConnectorMessage::TIMESTAMP]);
         let payload = &data[ProcConnectorMessage::INNER_PAYLOAD];
