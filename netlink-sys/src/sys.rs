@@ -259,22 +259,10 @@ impl Socket {
         let buf_len = buf.len() as libc::size_t;
 
         let res = unsafe { libc::sendto(self.0, buf_ptr, buf_len, flags, addr_ptr, addr_len) };
-
-        // TODO: remove this
-        // let res = unsafe {
-        //     libc::sendto(
-        //         self.0,
-        //         buf_ptr,
-        //         buf_len,
-        //         flags,
-        //         libc::PT_NULL as *const libc::sockaddr,
-        //         0,
-        //     )
-        // };
-
         if res < 0 {
             return Err(Error::last_os_error());
         }
+
         Ok(res as usize)
     }
 

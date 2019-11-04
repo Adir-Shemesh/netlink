@@ -38,19 +38,6 @@ impl Handle {
             .map_err(|e| e.context(ErrorKind::RequestFailed).into())
     }
 
-    /// Send a netlink message that expects an acknowledgement. The returned future resolved when
-    /// that ACK is received. If anything else is received, the future resolves into an error.
-    fn acked_request(&mut self, message: NetlinkMessage) -> impl Future<Item = (), Error = Error> {
-        self.request(message).take(1).for_each(|nl_msg| {
-            let (header, payload) = nl_msg.into_parts();
-            match payload {
-                NetlinkPayload::Ack(_) => Ok(()),
-                NetlinkPayload::Error(err_msg) => Err(ErrorKind::NetlinkError(err_msg).into()),
-                _ => Err(ErrorKind::UnexpectedMessage(NetlinkMessage::new(header, payload)).into()),
-            }
-        })
-    }
-
     /// Enable receiving proc connector events
     pub fn enable_events(&mut self) -> Result<(), Error> {
         let inner_payload = ProcConnectorMessage::ProcMcastListen;
@@ -69,12 +56,10 @@ impl Handle {
 
         let mut req = NetlinkMessage::from(msg);
 
-        // req.header.flags = NetlinkFlags::from(NLM_F_REQUEST | NLM_F_ACK);
         req.header.sequence_number = 0;
         req.header.flags = NetlinkFlags::default();
-        req.header.port_number = process::id() + 1;
+        req.header.port_number = process::id();
 
-        // self.acked_request(req)
         self.0
             .notify(req, *KERNEL_MCAST)
             .map_err(|e| e.context(ErrorKind::RequestFailed).into())

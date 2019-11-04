@@ -462,7 +462,7 @@ impl Emitable for ProcConnectorMessage {
 
         match self {
             ProcMcastListen | ProcMcastIgnore => std::mem::size_of::<u32>(), // sizeof(enum proc_cn_mcast_op)
-            // TODO: Change for specific event maybe? also the addition of cpu and timestamp is horrible.
+            // TODO: Consider turning tuple to struct
             Event((_, _, event)) => {
                 event.buffer_len() // Actual event struct
                     + std::mem::size_of::<u32>() // cpu
@@ -494,7 +494,6 @@ pub struct ConnectorMsgHeader {
 
 impl Emitable for ConnectorMsgHeader {
     fn buffer_len(&self) -> usize {
-        // Fixed size, should be 20 bytes
         std::mem::size_of::<ConnectorMsgHeader>()
     }
 
@@ -526,7 +525,7 @@ impl ConnectorMessage {
 
         match self.payload {
             ProcConnector(_) => NLMSG_DONE,
-            Other => NLMSG_DONE, // TODO: ???
+            Other => NLMSG_DONE,
         }
     }
 }

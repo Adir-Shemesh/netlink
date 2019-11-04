@@ -76,7 +76,7 @@ impl NetlinkPayload {
             #[cfg(feature = "audit")]
             Audit(ref msg) => msg.message_type(),
             #[cfg(feature = "connector")]
-            Connector(ref msg) => NLMSG_DONE, // msg.message_type(), // TODO: What the fuck?
+            Connector(_) => NLMSG_DONE,
             #[cfg(not(any(feature = "rtnetlink", feature = "audit", feature = "connector")))]
             _ => 0,
         }
@@ -260,7 +260,6 @@ impl<'buffer, T: AsRef<[u8]> + 'buffer> Parseable<NetlinkMessage> for NetlinkBuf
             }
             NLMSG_NOOP => Noop,
 
-            // TODO: comment - seems like when a connector packet is received, we get a Done message?
             #[cfg(not(feature = "connector"))]
             NLMSG_DONE => Done,
 

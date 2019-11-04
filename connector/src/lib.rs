@@ -24,7 +24,5 @@ use std::io;
 
 pub fn new_connection() -> io::Result<(Connection, Handle, UnboundedReceiver<NetlinkMessage>)> {
     let (conn, handle, messages) = netlink_proto::new_connection(Protocol::Connector)?;
-    // TODO: Remove this
-    // conn.skip_prepare = true;
     Ok((conn, Handle::new(handle), messages))
 }
