@@ -88,4 +88,19 @@ impl Handle {
         req.header.flags = NetlinkFlags::from(NLM_F_REQUEST | NLM_F_ACK);
         self.acked_request(req)
     }
+
+    /// Gets current audit status
+    pub fn get_status(&mut self) -> impl Stream<Item = StatusMessage, Error = Error> {
+        let mut req = NetlinkMessage::from(AuditMessage::GetStatus(None));
+        req.header.flags = NetlinkFlags::from(NLM_F_REQUEST | NLM_F_DUMP);
+
+        self.request(req).and_then(|nl_msg| {
+            let (header, payload) = nl_msg.into_parts();
+            match payload {
+                NetlinkPayload::Audit(AuditMessage::GetStatus(Some(status))) => Ok(status),
+                NetlinkPayload::Error(err_msg) => Err(ErrorKind::NetlinkError(err_msg).into()),
+                _ => Err(ErrorKind::UnexpectedMessage(NetlinkMessage::new(header, payload)).into()),
+            }
+        })
+    }
 }
