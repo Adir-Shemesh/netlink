@@ -7,25 +7,18 @@ use std::{
 
 use futures::{
     channel::mpsc::{UnboundedReceiver, UnboundedSender},
-    Future,
-    Sink,
-    Stream,
+    Future, Sink, Stream,
 };
 use log::{error, warn};
 use netlink_packet_core::{
-    NetlinkDeserializable,
-    NetlinkMessage,
-    NetlinkPayload,
-    NetlinkSerializable,
+    NetlinkDeserializable, NetlinkMessage, NetlinkPayload, NetlinkSerializable,
 };
 
 use crate::{
     codecs::NetlinkCodec,
     framed::NetlinkFramed,
     sys::{Socket, SocketAddr},
-    Protocol,
-    Request,
-    Response,
+    Protocol, Request, Response,
 };
 
 /// Connection to a Netlink socket, running in the background.
@@ -266,7 +259,7 @@ where
         debug!("forwarding unsolicited messages to the connection handle");
         pinned.forward_unsolicited_messages();
 
-        debug!("forwaring responses to previous requests to the connection handle");
+        debug!("forwarding responses to previous requests to the connection handle");
         pinned.forward_responses();
 
         debug!("handling requests");
