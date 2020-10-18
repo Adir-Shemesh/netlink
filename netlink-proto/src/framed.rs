@@ -64,10 +64,20 @@ where
                         reader.advance_mut(n);
                         addr
                     }
-                    Err(e) => {
-                        error!("failed to read from netlink socket: {:?}", e);
-                        return Poll::Ready(None);
-                    }
+                    Err(e) => match e.raw_os_error() {
+                        Some(105) => {
+                            error!("ENONMEM got 105");
+                            continue;
+                        }
+                        Some(-105) => {
+                            error!("ENONMEM got -105");
+                            continue;
+                        }
+                        _ => {
+                            error!("failed to read from netlink socket: {:?}", e);
+                            return Poll::Ready(None);
+                        }
+                    },
                 }
             };
         }
