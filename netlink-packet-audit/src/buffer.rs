@@ -2,10 +2,7 @@ use crate::{
     constants::*,
     rules::{RuleBuffer, RuleMessage},
     traits::{Parseable, ParseableParametrized},
-    AuditMessage,
-    DecodeError,
-    StatusMessage,
-    StatusMessageBuffer,
+    AuditMessage, DecodeError, StatusMessage, StatusMessageBuffer,
 };
 use anyhow::Context;
 
@@ -73,6 +70,10 @@ impl<'a, T: AsRef<[u8]> + ?Sized> ParseableParametrized<AuditBuffer<&'a T>, u16>
             i if (AUDIT_EVENT_MESSAGE_MIN..AUDIT_EVENT_MESSAGE_MAX).contains(&i) => {
                 let data = String::from_utf8(buf.inner().to_vec())
                     .context("failed to parse audit event data as a valid string")?;
+                Event((i, data))
+            }
+            i if (AUDIT_FIRST_USER_MSG..AUDIT_LAST_USER_MSG).contains(&i) => {
+                let data = String::from_utf8(buf.inner().to_vec()).context("userspace thingie")?;
                 Event((i, data))
             }
             i => {
